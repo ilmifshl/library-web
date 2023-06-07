@@ -3,7 +3,7 @@
 require_once 'connect.php'; // Include the connect.php file to establish the database connection
 
 // Execute a SELECT query
-$query = pg_query($db, "SELECT * FROM buku JOIN kategori ON buku.kode_kategori = kategori.kode_kategori");
+$query = pg_query($db, "SELECT * FROM buku JOIN kategori ON buku.kode_kategori = kategori.kode_kategori ORDER BY buku.judul_buku");
 $books = pg_fetch_all($query);
 
 $cat_query = pg_query($db, "SELECT * FROM kategori");
@@ -127,6 +127,9 @@ $categories = pg_fetch_all($cat_query);
             <table class="w-full text-sm text-left text-gray-500">
                 <thead class="text-xs text-gray-700 uppercase bg-gray-50 ">
                     <tr>
+                    <th scope="col" class="px-6 py-3">
+                            Kode Buku
+                        </th>
                         <th scope="col" class="px-6 py-3">
                             Judul Buku
                         </th>
@@ -137,6 +140,9 @@ $categories = pg_fetch_all($cat_query);
                             Penulis
                         </th>
                         <th scope="col" class="px-6 py-3">
+                            Jumlah
+                        </th>
+                        <th scope="col" class="px-6 py-3">
                             Aksi
                         </th>
                     </tr>
@@ -144,6 +150,9 @@ $categories = pg_fetch_all($cat_query);
                 <tbody>
                     <?php foreach ($books as $book) : ?>
                         <tr class="bg-white border-b">
+                        <th scope="row" class="px-6 py-4 font-medium whitespace-nowrap ">
+                                <?= $book['kode_buku'] ?>
+                            </th>
                             <th scope="row" class="px-6 py-4 font-medium whitespace-nowrap ">
                                 <?= $book['judul_buku'] ?>
                             </th>
@@ -152,6 +161,9 @@ $categories = pg_fetch_all($cat_query);
                             </td>
                             <td class="px-6 py-4">
                                 <?= $book['penulis'] ?>
+                            </td>
+                            <td class="px-6 py-4">
+                                <?= $book['jumlah'] ?>
                             </td>
                             <td class="px-6 py-4">
                                 <a href="#" class="font-medium text-blue-600 hover:underline">Edit</a>
