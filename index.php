@@ -18,6 +18,21 @@ $borrows = pg_fetch_all($transaksi_query);
 $book_query = pg_query($db, "SELECT * FROM buku JOIN kategori ON buku.kode_kategori = kategori.kode_kategori
                                 WHERE buku.jumlah > 0");
 $books = pg_fetch_all($book_query);
+
+$dipinjam_query = pg_query($db, "SELECT COUNT(kode_buku) AS jumlah FROM detail_transaksi");
+$pinjem = pg_fetch_assoc($dipinjam_query);
+$jumlah_dipinjam = $pinjem['jumlah']; // Mengambil jumlah dipinjam dari hasil query
+
+$telat_query = pg_query($db, "SELECT COUNT(*) AS jumlah
+                                    FROM transaksi
+                                    WHERE denda IS NOT NULL");
+$telat = pg_fetch_assoc($telat_query);
+$jumlah_telat = $telat['jumlah'];
+
+$anggota_query = pg_query($db, "SELECT COUNT(*) AS jumlah
+                                    FROM anggota");
+$anggota = pg_fetch_assoc($anggota_query);
+$jumlah_anggota = $anggota['jumlah'];
 // Check if the query was successful
 if (!$members) {
     die("Query failed: " . pg_last_error());
@@ -196,14 +211,14 @@ $hari = date('l', strtotime($tanggal));
                     <i class='bx bx-book-open text-2xl bg-[#cea9d9] px-2 pt-1 text-[#66237a] rounded-lg mr-3 w-10 h-10'></i>
                     <div>
                         <p class="text-slate-500">Buku yang dipinjam</p>
-                        <p class="font-bold text-xl">8</p>
+                        <p class="font-bold text-xl"><?= $jumlah_dipinjam ?></p>
                     </div>
                 </div>
                 <div class="flex justify-between items-center bg-[#daf1f4] rounded-lg py-6 px-4">
                     <i class='bx bx-time-five text-2xl bg-[#aedce0] px-2 pt-1 text-[#257d81] rounded-lg mr-3 w-10 h-10'></i>
                     <div>
                         <p class="text-slate-500">Telat pengembalian</p>
-                        <p class="font-bold text-xl">8</p>
+                        <p class="font-bold text-xl"><?= $jumlah_telat ?></p>
                     </div>
                 </div>
                 <div class="flex justify-between items-center bg-[#fff4e6] rounded-lg px-4">
@@ -213,7 +228,7 @@ $hari = date('l', strtotime($tanggal));
 
                     <div class="pr-6">
                         <p class="text-slate-500">Jumlah anggota</p>
-                        <p class="font-bold text-xl">8</p>
+                        <p class="font-bold text-xl"><?= $jumlah_anggota ?></p>
                     </div>
                 </div>
                 <div class="flex justify-center items-center bg-[#fffbe6] rounded-lg">
@@ -295,45 +310,50 @@ $hari = date('l', strtotime($tanggal));
                                             Kembali
                                         </button>
                                         <p class="mx-2 text-blue-600">|</p>
-                                        <button data-modal-target="authentication-modal-<?= $borrow['peminjaman']?>" data-modal-toggle="authentication-modal-<?= $borrow['peminjaman']?>" class="text-blue-600" type="button">
+                                        <button data-modal-target="authentication-modal-<?= $borrow['peminjaman'] ?>" data-modal-toggle="authentication-modal-<?= $borrow['peminjaman'] ?>" class="text-blue-600" type="button">
                                             Detail
                                         </button>
                                     </div>
 
-                                    <div id="authentication-modal-<?= $borrow['peminjaman']?>" tabindex="-1" aria-hidden="true" class="fixed top-0 left-0 right-0 z-50 hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full">
+                                    <div id="authentication-modal-<?= $borrow['peminjaman'] ?>" tabindex="-1" aria-hidden="true" class="fixed top-0 left-0 right-0 z-50 hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full">
                                         <div class="relative w-full max-w-md max-h-full">
                                             <!-- Modal content -->
                                             <div class="relative bg-white rounded-lg shadow d">
-                                                <button type="button" class="absolute top-3 right-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center " data-modal-hide="authentication-modal-<?= $borrow['peminjaman']?>">
+                                                <button type="button" class="absolute top-3 right-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center " data-modal-hide="authentication-modal-<?= $borrow['peminjaman'] ?>">
                                                     <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                                                         <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
                                                     </svg>
                                                     <span class="sr-only">Close modal</span>
                                                 </button>
                                                 <div class="px-6 py-6 lg:px-8">
-                                                    <h3 class="mb-4 text-xl font-medium text-gray-900">Detail Peminjaman #<?= $borrow['peminjaman']?></h3>
+                                                    <h3 class="mb-4 text-xl font-medium text-gray-900">Detail Peminjaman #<?= $borrow['peminjaman'] ?></h3>
                                                     <form class="space-y-6" action="#">
-                                                        <div>
-                                                            <label for="email" class="block mb-2 text-sm font-medium text-gray-900 ">Your email</label>
-                                                            <input type="email" name="email" id="email" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 " placeholder="name@company.com" required>
+                                                        <div class="relative">
+                                                            <input type="text" id="floating_outlined" class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " value="<?= $borrow['peminjam'] ?>" disabled />
+                                                            <label for="floating_outlined" class="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 left-1">Nama Peminjam</label>
                                                         </div>
-                                                        <div>
-                                                            <label for="password" class="block mb-2 text-sm font-medium text-gray-900">Your password</label>
-                                                            <input type="password" name="password" id="password" placeholder="••••••••" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 " required>
+                                                        <div class="relative">
+                                                            <input type="text" id="floating_outlined" class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " value="<?= $borrow['petugas'] ?>" disabled />
+                                                            <label for="floating_outlined" class="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white  px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 left-1">Nama Petugas</label>
                                                         </div>
-                                                        <div class="flex justify-between">
-                                                            <div class="flex items-start">
-                                                                <div class="flex items-center h-5">
-                                                                    <input id="remember" type="checkbox" value="" class="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-blue-300 " required>
-                                                                </div>
-                                                                <label for="remember" class="ml-2 text-sm font-medium text-gray-900 ">Remember me</label>
+                                                        <p>Buku yang dipinjam</p>
+                                                        <?php
+                                                        require_once 'connect.php';
+
+                                                        $transaction = $borrow['peminjaman'];
+                                                        $query = pg_query($db, "SELECT * FROM detail_transaksi d
+                                                                                JOIN buku b ON d.kode_buku = b.kode_buku
+                                                                                WHERE kode_transaksi = '$transaction'");
+                                                        $juduls = pg_fetch_all($query);
+                                                        ?>
+                                                        <?php $i = 1; ?>
+                                                        <?php foreach ($juduls as $judul) : ?>
+                                                            <div class="relative">
+                                                                <input type="text" id="floating_outlined" class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " value="<?= $judul['judul_buku'] ?>" disabled />
+                                                                <label for="floating_outlined" class="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white  px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 left-1">Buku #<?= $i ?></label>
                                                             </div>
-                                                            <a href="#" class="text-sm text-blue-700 hover:underline ">Lost Password?</a>
-                                                        </div>
-                                                        <button type="submit" class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center ">Login to your account</button>
-                                                        <div class="text-sm font-medium text-gray-500 ">
-                                                            Not registered? <a href="#" class="text-blue-700 hover:underline ">Create account</a>
-                                                        </div>
+                                                            <?php $i++ ?>
+                                                        <?php endforeach ?>
                                                     </form>
                                                 </div>
                                             </div>
@@ -354,9 +374,9 @@ $hari = date('l', strtotime($tanggal));
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                                     </svg>
                                                     <h3 class="mb-5 text-lg font-normal text-gray-500">Apakah <?= $borrow['peminjam'] ?> sudah mengembalikan buku?</h3>
-                                                    <button data-modal-hide="popup-modal-<?= $borrow['peminjaman'] ?>" type="button" class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 transition duration-300">Durung</button>
+                                                    <button data-modal-hide="popup-modal-<?= $borrow['peminjaman'] ?>" type="button" class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 transition duration-300">Belum</button>
                                                     <a href="./controller/pengembalian.php?kode_transaksi=<?= $borrow['peminjaman'] ?>" data-modal-hide="popup-modal-<?= $borrow['peminjaman'] ?>" class="text-white bg-[#2f4859] hover:bg-[#162a38] focus:ring-4 focus:outline-none focus:ring-[#2f4859] font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center mr-2 transition duration-300">
-                                                        Uwes
+                                                        Ya, sudah.
                                                     </a>
                                                 </div>
                                             </div>
