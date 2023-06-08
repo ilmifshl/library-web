@@ -25,7 +25,7 @@ $jumlah_dipinjam = $pinjem['jumlah']; // Mengambil jumlah dipinjam dari hasil qu
 
 $telat_query = pg_query($db, "SELECT COUNT(*) AS jumlah
                                     FROM transaksi
-                                    WHERE denda IS NOT NULL");
+                                    WHERE denda > 0");
 $telat = pg_fetch_assoc($telat_query);
 $jumlah_telat = $telat['jumlah'];
 
@@ -34,9 +34,7 @@ $anggota_query = pg_query($db, "SELECT COUNT(*) AS jumlah
 $anggota = pg_fetch_assoc($anggota_query);
 $jumlah_anggota = $anggota['jumlah'];
 // Check if the query was successful
-if (!$members) {
-    die("Query failed: " . pg_last_error());
-}
+
 
 date_default_timezone_set('Asia/Jakarta');
 
@@ -102,13 +100,13 @@ $hari = date('l', strtotime($tanggal));
                 </li>
                 <li>
                     <a href="./petugas.php" class="flex items-center p-2 text-[#90a5b0] rounded-lg  hover:text-slate-300 ">
-                        <i class='bx bxs-book text-2xl'></i>
+                        <i class='bx bxs-user text-2xl'></i>
                         <span class="ml-3">Petugas</span>
                     </a>
                 </li>
                 <li>
                     <a href="./anggota.php" class="flex items-center p-2 text-[#90a5b0] rounded-lg  hover:text-slate-300 ">
-                        <i class='bx bxs-book text-2xl'></i>
+                        <i class='bx bxs-user text-2xl'></i>
                         <span class="ml-3">Anggota</span>
                     </a>
                 </li>
@@ -305,10 +303,12 @@ $hari = date('l', strtotime($tanggal));
                                 <td class="px-6 py-4 flex justify-center ietms-center">
 
                                     <div class="flex">
+                                        <?php if($borrow['tanggal_kembali'] == NULL) : ?>
                                         <button data-modal-target="popup-modal-<?= $borrow['peminjaman'] ?>" data-modal-toggle="popup-modal-<?= $borrow['peminjaman'] ?>" class="text-blue-600" type="button">
                                             Kembali
                                         </button>
                                         <p class="mx-2 text-blue-600">|</p>
+                                        <?php endif ?>
                                         <button data-modal-target="authentication-modal-<?= $borrow['peminjaman'] ?>" data-modal-toggle="authentication-modal-<?= $borrow['peminjaman'] ?>" class="text-blue-600" type="button">
                                             Detail
                                         </button>
@@ -391,6 +391,7 @@ $hari = date('l', strtotime($tanggal));
         </div>
     </div>
 
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.6.5/flowbite.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.6.5/datepicker.min.js"></script>
     <script>
@@ -398,16 +399,18 @@ $hari = date('l', strtotime($tanggal));
         const daftarBukuContainer = document.getElementById('daftar_buku');
 
         tambahBukuBtn.addEventListener('click', function() {
+            let i = 0;
             const bukuInput = document.createElement('div');
+            bukuInput.className += "flex gap-x-2 mb-2.5";
             bukuInput.innerHTML = `
-            <select id="buku" name="buku[]" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" required>
-                                        <option value="" selected>Pilih Buku</option>
-                                        <?php foreach ($books as $book) : ?>
-                                            <option value="<?= $book['kode_buku'] ?>"> <?= $book['judul_buku'] ?> (<?= $book['penulis'] ?>)</option>
-                                        <?php endforeach ?>
-                                    </select>
-            <button type="button" class="hapus_buku text-red-500 hover:text-red-700 text-sm">Hapus</button>
-        `;
+            <select id="buku" name="buku[]" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:outline-none block w-full p-2.5" required>
+                <option value="" selected>Pilih Buku</option>
+                <?php foreach ($books as $book) : ?>
+                    <option value="<?= $book['kode_buku'] ?>"> <?= $book['judul_buku'] ?> (<?= $book['penulis'] ?>)</option>
+                <?php endforeach ?>
+            </select>
+            <button type="button" class="hapus_buku flex justify-center items-center text-red-500 hover:text-white hover:bg-red-500 py-1.5 px-2.5 text-lg rounded-md transition duration-300"><i class='bx bxs-trash'></i></button>
+            `;
             daftarBukuContainer.appendChild(bukuInput);
         });
 
