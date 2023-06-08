@@ -19,7 +19,7 @@ $book_query = pg_query($db, "SELECT * FROM buku JOIN kategori ON buku.kode_kateg
                                 WHERE buku.jumlah > 0");
 $books = pg_fetch_all($book_query);
 
-$dipinjam_query = pg_query($db, "SELECT COUNT(kode_buku) AS jumlah FROM detail_transaksi");
+$dipinjam_query = pg_query($db, "SELECT COUNT(kode_buku) AS jumlah FROM detail_transaksi WHERE status IS NULL");
 $pinjem = pg_fetch_assoc($dipinjam_query);
 $jumlah_dipinjam = $pinjem['jumlah']; // Mengambil jumlah dipinjam dari hasil query
 
@@ -56,7 +56,6 @@ $hari = date('l', strtotime($tanggal));
     <script src="https://cdn.tailwindcss.com"></script>
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link href="https://cdn.lineicons.com/4.0/lineicons.css" rel="stylesheet" />
-
     <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.6.5/flowbite.min.css" rel="stylesheet" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Library</title>
